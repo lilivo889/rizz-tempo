@@ -7,23 +7,61 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lilivo889.testtempo",
+      "bitcode": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Rizz Gym needs camera access to work",
+        "NSMicrophoneUsageDescription": "Rizz Gym needs microphone access to work",
+        "NSAudioSessionUsageDescription": "Rizz Gym needs audio session access for voice calls",
+        "UIBackgroundModes": ["voip"],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
+
     "android": {
+      "package": "com.lilivo889.testtempo",
+      "permissions": [
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "CAMERA",
+        "SYSTEM_ALERT_WINDOW",
+        "WAKE_LOCK",
+        "BLUETOOTH",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_CAMERA",
+        "FOREGROUND_SERVICE_MICROPHONE",
+        "FOREGROUND_SERVICE_MEDIA_PROJECTION",
+        "POST_NOTIFICATIONS"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
+
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+
     "plugins": [
       "expo-router",
+      "@config-plugins/react-native-webrtc",
+      "@daily-co/config-plugin-rn-daily-js",
+      [
+        "expo-build-properties",
+        {
+          "android": { "minSdkVersion": 24 },
+          "ios": { "deploymentTarget": "13.4" }
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -34,8 +72,12 @@
         }
       ]
     ],
-    "experiments": {
-      "typedRoutes": true
+
+    "experiments": { "typedRoutes": true },
+
+    "extra": {
+      "router": {},
+      "eas": { "projectId": "85d1dde9-4cd1-4ec4-99b8-988b3a4b611b" }
     }
   }
 }
