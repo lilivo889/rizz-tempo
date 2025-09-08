@@ -54,7 +54,15 @@
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
     "tailwindcss": "^3.4.17",
-    "tempo-devtools": "^2.0.106"
+    "tempo-devtools": "^2.0.106",
+
+    "@vapi-ai/react-native": "~0.1.7",
+    "@config-plugins/react-native-webrtc": "~8.0.0",
+    "@daily-co/config-plugin-rn-daily-js": "~0.0.4",
+    "@daily-co/react-native-daily-js": "~0.59.0",
+    "@daily-co/react-native-webrtc": "~118.0.3",
+    "react-native-background-timer": "~2.4.1",
+    "react-native-get-random-values": "~1.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
