@@ -22,7 +22,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (process.env.EXPO_PUBLIC_TEMPO && Platform.OS === "web") {
       const { TempoDevtools } = require("tempo-devtools");
-      TempoDevtools.init();
+      /* TempoDevtools.init() [deprecated] */;
     }
   }, []);
 
