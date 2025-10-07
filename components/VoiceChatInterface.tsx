@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Mic, MicOff, SkipForward, Pause, Play } from "lucide-react-native";
 import FeedbackPanel from "./FeedbackPanel";
@@ -9,6 +9,7 @@ interface VoiceChatInterfaceProps {
   partnerAvatar?: string;
   scenario?: string;
   difficulty?: "easy" | "medium" | "hard";
+  agentId?: string;
   onEndSession?: () => void;
 }
 
@@ -17,35 +18,23 @@ const VoiceChatInterface = ({
   partnerAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
   scenario = "Coffee Shop",
   difficulty = "medium",
+  agentId = "your-agent-id",
   onEndSession = () => {},
 }: VoiceChatInterfaceProps) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [transcript, setTranscript] = useState<
     Array<{ speaker: string; text: string }>
-  >([]);
+  >([
+    { speaker: partnerName, text: "Hi! Ready to practice your conversation skills?" }
+  ]);
   const [audioVisualization, setAudioVisualization] = useState<number[]>([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
-  // Mock conversation data
+  // Simulate audio visualization
   useEffect(() => {
-    setTranscript([
-      {
-        speaker: partnerName,
-        text: "Hi there! It's nice to meet you. What brings you to this coffee shop today?",
-      },
-      {
-        speaker: "You",
-        text: "I come here pretty often actually. They have the best lattes in town. How about you?",
-      },
-      {
-        speaker: partnerName,
-        text: "This is my first time here! I've heard great things about their pastries. Any recommendations?",
-      },
-    ]);
-
-    // Simulate audio visualization
     const interval = setInterval(() => {
-      if (isRecording && !isPaused) {
+      if (isConnected && !isMuted) {
         setAudioVisualization(
           Array(10)
             .fill(0)
@@ -57,31 +46,35 @@ const VoiceChatInterface = ({
     }, 150);
 
     return () => clearInterval(interval);
-  }, [isRecording, isPaused, partnerName]);
+  }, [isConnected, isMuted]);
 
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    if (isPaused) setIsPaused(false);
+  const startConversation = async () => {
+    setIsConnected(true);
+    setTranscript(prev => [...prev, {
+      speaker: "You",
+      text: "Hey, how's it going?"
+    }]);
+    
+    // Simulate AI response
+    setTimeout(() => {
+      setTranscript(prev => [...prev, {
+        speaker: partnerName,
+        text: "Pretty good! What brings you here today?"
+      }]);
+    }, 1500);
   };
 
-  const togglePause = () => {
-    setIsPaused(!isPaused);
+  const endConversation = async () => {
+    setIsConnected(false);
+    onEndSession();
   };
 
-  const skipTurn = () => {
-    // Add a new response from the AI partner
-    const newResponses = [
-      "That sounds interesting! Tell me more about your hobbies.",
-      "I love trying new restaurants. Do you have any favorites?",
-      "What do you enjoy doing on weekends?",
-    ];
-    const randomResponse =
-      newResponses[Math.floor(Math.random() * newResponses.length)];
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
 
-    setTranscript([
-      ...transcript,
-      { speaker: partnerName, text: randomResponse },
-    ]);
+  const sendMessage = async (text: string) => {
+    setTranscript(prev => [...prev, { speaker: "You", text }]);
   };
 
   return (
@@ -98,7 +91,7 @@ const VoiceChatInterface = ({
         </View>
         <TouchableOpacity
           className="bg-red-500 px-3 py-1 rounded-full"
-          onPress={onEndSession}
+          onPress={endConversation}
         >
           <Text className="text-white font-medium">End Session</Text>
         </TouchableOpacity>
@@ -116,8 +109,10 @@ const VoiceChatInterface = ({
             {partnerName}
           </Text>
           <View className="flex flex-row items-center">
-            <View className="w-2 h-2 rounded-full bg-green-500 mr-2"></View>
-            <Text className="text-sm text-slate-500">Active</Text>
+            <View className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`}></View>
+            <Text className="text-sm text-slate-500">
+              {isConnected ? (isSpeaking ? 'Speaking' : 'Listening') : 'Disconnected'}
+            </Text>
           </View>
         </View>
       </View>
@@ -146,7 +141,7 @@ const VoiceChatInterface = ({
           <View
             key={index}
             style={{ height: height }}
-            className={`w-2 mx-1 rounded-full ${isRecording && !isPaused ? "bg-blue-500" : "bg-gray-300"}`}
+            className={`w-2 mx-1 rounded-full ${isConnected && !isMuted ? "bg-blue-500" : "bg-gray-300"}`}
           />
         ))}
       </View>
@@ -155,36 +150,36 @@ const VoiceChatInterface = ({
       <View className="flex flex-row justify-around items-center bg-white p-3 rounded-lg shadow-sm">
         <TouchableOpacity
           className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center"
-          onPress={togglePause}
-          disabled={!isRecording}
+          onPress={toggleMute}
+          disabled={!isConnected}
         >
-          {isPaused ? (
-            <Play size={24} color={isRecording ? "#3b82f6" : "#9ca3af"} />
+          {isMuted ? (
+            <MicOff size={24} color={isConnected ? "#ef4444" : "#9ca3af"} />
           ) : (
-            <Pause size={24} color={isRecording ? "#3b82f6" : "#9ca3af"} />
+            <Mic size={24} color={isConnected ? "#3b82f6" : "#9ca3af"} />
           )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`w-20 h-20 rounded-full flex items-center justify-center ${isRecording ? "bg-red-500" : "bg-blue-500"}`}
-          onPress={toggleRecording}
+          className={`w-20 h-20 rounded-full flex items-center justify-center ${isConnected ? "bg-red-500" : "bg-blue-500"}`}
+          onPress={isConnected ? endConversation : startConversation}
         >
-          {isRecording ? (
-            <MicOff size={32} color="white" />
+          {isConnected ? (
+            <Pause size={32} color="white" />
           ) : (
-            <Mic size={32} color="white" />
+            <Play size={32} color="white" />
           )}
         </TouchableOpacity>
 
         <TouchableOpacity
           className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center"
-          onPress={skipTurn}
+          onPress={() => sendMessage("Can you repeat that?")}
+          disabled={!isConnected}
         >
-          <SkipForward size={24} color="#4b5563" />
+          <SkipForward size={24} color={isConnected ? "#4b5563" : "#9ca3af"} />
         </TouchableOpacity>
       </View>
 
-      {/* Feedback panel */}
       <FeedbackPanel
         toneScore={85}
         contentScore={72}
