@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.testtempo'
+    namespace 'com.xavierbernard.testtempo'
     defaultConfig {
-        applicationId 'com.anonymous.testtempo'
+        applicationId 'com.xavierbernard.testtempo'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

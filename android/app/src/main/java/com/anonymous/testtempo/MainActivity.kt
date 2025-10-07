@@ -1,4 +1,4 @@
-package com.anonymous.testtempo
+package com.xavierbernard.testtempo
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
