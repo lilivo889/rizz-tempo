@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from "react-native";
 import { Image } from "expo-image";
 import { Mic, MicOff, SkipForward, Pause, Play } from "lucide-react-native";
+import { useConversation } from '@elevenlabs/react-native';
 import FeedbackPanel from "./FeedbackPanel";
 
 interface VoiceChatInterfaceProps {
@@ -18,7 +19,7 @@ const VoiceChatInterface = ({
   partnerAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
   scenario = "Coffee Shop",
   difficulty = "medium",
-  agentId = "your-agent-id",
+  agentId,
   onEndSession = () => {},
 }: VoiceChatInterfaceProps) => {
   const [transcript, setTranscript] = useState<
@@ -28,8 +29,45 @@ const VoiceChatInterface = ({
   ]);
   const [audioVisualization, setAudioVisualization] = useState<number[]>([]);
   const [isMuted, setIsMuted] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const conversation = useConversation({
+    onError: (message, context) => {
+      console.error('Conversation error:', message, context);
+      Alert.alert('Error', `Conversation error: ${message}`);
+    },
+    onStatusChange: ({ status }) => {
+      console.log('Status:', status);
+      if (status === 'speaking') {
+        setIsSpeaking(true);
+      } else {
+        setIsSpeaking(false);
+      }
+    },
+    onConnect: ({ conversationId }) => {
+      console.log('Connected to', conversationId);
+    },
+    onDisconnect: (detail) => {
+      console.log('Disconnected:', detail);
+    },
+    onMessage: (message) => {
+      console.log('Message:', message);
+      if (message.type === 'user_transcript') {
+        setTranscript(prev => [...prev, {
+          speaker: "You",
+          text: message.message
+        }]);
+      } else if (message.type === 'agent_response') {
+        setTranscript(prev => [...prev, {
+          speaker: partnerName,
+          text: message.message
+        }]);
+      }
+    },
+  });
+
+  const isConnected = conversation.status === 'connected';
 
   // Simulate audio visualization
   useEffect(() => {
@@ -49,32 +87,45 @@ const VoiceChatInterface = ({
   }, [isConnected, isMuted]);
 
   const startConversation = async () => {
-    setIsConnected(true);
-    setTranscript(prev => [...prev, {
-      speaker: "You",
-      text: "Hey, how's it going?"
-    }]);
+    if (isStarting) return;
+    setIsStarting(true);
     
-    // Simulate AI response
-    setTimeout(() => {
-      setTranscript(prev => [...prev, {
-        speaker: partnerName,
-        text: "Pretty good! What brings you here today?"
-      }]);
-    }, 1500);
+    try {
+      const finalAgentId = agentId || process.env.EXPO_PUBLIC_AGENT_ID;
+      
+      if (!finalAgentId) {
+        Alert.alert('Error', 'Agent ID is not configured. Please set EXPO_PUBLIC_AGENT_ID in your environment variables.');
+        return;
+      }
+
+      await conversation.startSession({
+        agentId: finalAgentId,
+        dynamicVariables: { 
+          platform: Platform.OS,
+          scenario: scenario,
+          difficulty: difficulty,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to start conversation:', error);
+      Alert.alert('Error', 'Failed to start conversation. Please try again.');
+    } finally {
+      setIsStarting(false);
+    }
   };
 
   const endConversation = async () => {
-    setIsConnected(false);
-    onEndSession();
+    try {
+      await conversation.endSession();
+      onEndSession();
+    } catch (error) {
+      console.error('Failed to end conversation:', error);
+    }
   };
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-  };
-
-  const sendMessage = async (text: string) => {
-    setTranscript(prev => [...prev, { speaker: "You", text }]);
+    // TODO: Implement actual mute functionality with ElevenLabs SDK
   };
 
   return (
@@ -92,6 +143,7 @@ const VoiceChatInterface = ({
         <TouchableOpacity
           className="bg-red-500 px-3 py-1 rounded-full"
           onPress={endConversation}
+          disabled={!isConnected}
         >
           <Text className="text-white font-medium">End Session</Text>
         </TouchableOpacity>
@@ -163,6 +215,7 @@ const VoiceChatInterface = ({
         <TouchableOpacity
           className={`w-20 h-20 rounded-full flex items-center justify-center ${isConnected ? "bg-red-500" : "bg-blue-500"}`}
           onPress={isConnected ? endConversation : startConversation}
+          disabled={isStarting}
         >
           {isConnected ? (
             <Pause size={32} color="white" />
@@ -173,7 +226,6 @@ const VoiceChatInterface = ({
 
         <TouchableOpacity
           className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center"
-          onPress={() => sendMessage("Can you repeat that?")}
           disabled={!isConnected}
         >
           <SkipForward size={24} color={isConnected ? "#4b5563" : "#9ca3af"} />
