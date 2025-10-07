@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>myapp</string>
-          <string>com.anonymous.testtempo</string>
+          <string>com.xavierbernard.testtempo</string>
         </array>
       </dict>
       <dict>
