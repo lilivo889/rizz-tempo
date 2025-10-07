@@ -9,13 +9,12 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { Image } from "expo-image";
 import { Bell, Settings, ChevronRight, ArrowLeft } from "lucide-react-native";
-import { ElevenLabsProvider } from '@elevenlabs/react-native';
 
 import PracticeScenarioSelector from "../components/PracticeScenarioSelector";
 import PerformanceDashboard from "../components/PerformanceDashboard";
 import VoiceChatInterface from "../components/VoiceChatInterface";
 
-function MainDashboard() {
+export default function MainDashboard() {
   const [activeTab, setActiveTab] = useState("practice");
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
@@ -173,13 +172,5 @@ function MainDashboard() {
         </>
       )}
     </SafeAreaView>
-  );
-}
-
-export default function App() {
-  return (
-    <ElevenLabsProvider>
-      <MainDashboard />
-    </ElevenLabsProvider>
   );
 }
