@@ -29,30 +29,19 @@ const VoiceChatInterface = ({
   ]);
   const [audioVisualization, setAudioVisualization] = useState<number[]>([]);
   const [isMuted, setIsMuted] = useState(false);
-  const [isStarting, setIsStarting] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const conversation = useConversation({
-    onError: (message, context) => {
-      console.error('Conversation error:', message, context);
-      Alert.alert('Error', `Conversation error: ${message}`);
+    onConnect: () => {
+      console.log('Connected to conversation');
+      setIsConnected(true);
     },
-    onStatusChange: ({ status }) => {
-      console.log('Status:', status);
-      if (status === 'speaking') {
-        setIsSpeaking(true);
-      } else {
-        setIsSpeaking(false);
-      }
-    },
-    onConnect: ({ conversationId }) => {
-      console.log('Connected to', conversationId);
-    },
-    onDisconnect: (detail) => {
-      console.log('Disconnected:', detail);
+    onDisconnect: () => {
+      console.log('Disconnected from conversation');
+      setIsConnected(false);
     },
     onMessage: (message) => {
-      console.log('Message:', message);
+      console.log('Message received:', message);
       if (message.type === 'user_transcript') {
         setTranscript(prev => [...prev, {
           speaker: "You",
@@ -65,9 +54,11 @@ const VoiceChatInterface = ({
         }]);
       }
     },
+    onError: (error) => {
+      console.error('Conversation error:', error);
+      Alert.alert('Error', `Conversation error: ${error}`);
+    },
   });
-
-  const isConnected = conversation.status === 'connected';
 
   // Simulate audio visualization
   useEffect(() => {
@@ -87,9 +78,6 @@ const VoiceChatInterface = ({
   }, [isConnected, isMuted]);
 
   const startConversation = async () => {
-    if (isStarting) return;
-    setIsStarting(true);
-    
     try {
       const finalAgentId = agentId || process.env.EXPO_PUBLIC_AGENT_ID;
       
@@ -100,17 +88,10 @@ const VoiceChatInterface = ({
 
       await conversation.startSession({
         agentId: finalAgentId,
-        dynamicVariables: { 
-          platform: Platform.OS,
-          scenario: scenario,
-          difficulty: difficulty,
-        },
       });
     } catch (error) {
       console.error('Failed to start conversation:', error);
       Alert.alert('Error', 'Failed to start conversation. Please try again.');
-    } finally {
-      setIsStarting(false);
     }
   };
 
@@ -125,7 +106,6 @@ const VoiceChatInterface = ({
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    // TODO: Implement actual mute functionality with ElevenLabs SDK
   };
 
   return (
@@ -163,9 +143,12 @@ const VoiceChatInterface = ({
           <View className="flex flex-row items-center">
             <View className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`}></View>
             <Text className="text-sm text-slate-500">
-              {isConnected ? (isSpeaking ? 'Speaking' : 'Listening') : 'Disconnected'}
+              Status: {conversation.status}
             </Text>
           </View>
+          <Text className="text-xs text-slate-400">
+            {conversation.isSpeaking ? 'Speaking...' : 'Listening'}
+          </Text>
         </View>
       </View>
 
@@ -215,7 +198,6 @@ const VoiceChatInterface = ({
         <TouchableOpacity
           className={`w-20 h-20 rounded-full flex items-center justify-center ${isConnected ? "bg-red-500" : "bg-blue-500"}`}
           onPress={isConnected ? endConversation : startConversation}
-          disabled={isStarting}
         >
           {isConnected ? (
             <Pause size={32} color="white" />
@@ -231,6 +213,23 @@ const VoiceChatInterface = ({
           <SkipForward size={24} color={isConnected ? "#4b5563" : "#9ca3af"} />
         </TouchableOpacity>
       </View>
+
+      {conversation.canSendFeedback && (
+        <View className="flex flex-row justify-center gap-2 mt-2">
+          <TouchableOpacity
+            className="bg-gray-100 p-2 rounded-lg"
+            onPress={() => conversation.sendFeedback(true)}
+          >
+            <Text>👍</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-gray-100 p-2 rounded-lg"
+            onPress={() => conversation.sendFeedback(false)}
+          >
+            <Text>👎</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <FeedbackPanel
         toneScore={85}

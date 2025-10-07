@@ -15,7 +15,7 @@
         "NSCameraUsageDescription": "This app needs camera access for video features."
       },
       "bitcode": false,
-      "bundleIdentifier": "com.anonymous.testtempo"
+      "bundleIdentifier": "com.xavierbernard.testtempo"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,7 +36,7 @@
         "android.permission.WAKE_LOCK",
         "android.permission.BLUETOOTH"
       ],
-      "package": "com.anonymous.testtempo"
+      "package": "com.xavierbernard.testtempo"
     },
     "web": {
       "bundler": "metro",
@@ -60,6 +60,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "85d1dde9-4cd1-4ec4-99b8-988b3a4b611b"
+      }
     }
   }
 }

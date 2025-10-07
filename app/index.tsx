@@ -15,43 +15,55 @@ import PerformanceDashboard from "../components/PerformanceDashboard";
 import VoiceChatInterface from "../components/VoiceChatInterface";
 
 export default function MainDashboard() {
-  const [activeTab, setActiveTab] = useState("practice");
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
-
-  const userName = "Alex";
-  const lastSessionDate = "Yesterday";
+  const [activeView, setActiveView] = useState<
+    "dashboard" | "scenarios" | "performance" | "chat"
+  >("dashboard");
+  const [selectedScenario, setSelectedScenario] = useState<{
+    id: string;
+    name: string;
+    partner: string;
+  } | null>(null);
 
   const handleScenarioSelect = (scenarioId: string) => {
-    setSelectedScenario(scenarioId);
+    const scenarios = {
+      "coffee-shop": { id: "coffee-shop", name: "Coffee Shop", partner: "Emma" },
+      "gym": { id: "gym", name: "Gym", partner: "Alex" },
+      "bar": { id: "bar", name: "Bar", partner: "Jordan" },
+    };
+    setSelectedScenario(scenarios[scenarioId as keyof typeof scenarios]);
+    setActiveView("chat");
   };
 
-  const handleEndSession = () => {
+  const handleBackToDashboard = () => {
+    setActiveView("dashboard");
     setSelectedScenario(null);
   };
 
-  const getScenarioDetails = (scenarioId: string) => {
-    const scenarios: Record<string, { name: string; partner: string; avatar: string }> = {
-      "coffee-shop": {
-        name: "Coffee Shop",
-        partner: "Emma",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma"
-      },
-      "dinner-date": {
-        name: "Dinner Date",
-        partner: "Sophie",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie"
-      },
-      "casual-meetup": {
-        name: "Casual Meetup",
-        partner: "Alex",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
-      }
-    };
-    return scenarios[scenarioId] || scenarios["coffee-shop"];
-  };
+  if (activeView === "chat" && selectedScenario) {
+    return (
+      <VoiceChatInterface
+        scenario={selectedScenario.name}
+        partnerName={selectedScenario.partner}
+        onBack={handleBackToDashboard}
+      />
+    );
+  }
+
+  if (activeView === "scenarios") {
+    return (
+      <PracticeScenarioSelector
+        onScenarioSelect={handleScenarioSelect}
+        onBack={handleBackToDashboard}
+      />
+    );
+  }
+
+  if (activeView === "performance") {
+    return <PerformanceDashboard onBack={handleBackToDashboard} />;
+  }
 
   return (
-    <SafeAreaView className="flex-1 bg-indigo-50">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar style="dark" />
 
       {/* Header */}
@@ -60,7 +72,7 @@ export default function MainDashboard() {
           {selectedScenario && (
             <TouchableOpacity 
               className="mr-3 p-2"
-              onPress={handleEndSession}
+              onPress={handleBackToDashboard}
             >
               <ArrowLeft size={24} color="#4338ca" />
             </TouchableOpacity>
@@ -86,8 +98,8 @@ export default function MainDashboard() {
       {selectedScenario ? (
         <ScrollView className="flex-1 p-4">
           <VoiceChatInterface
-            scenario={getScenarioDetails(selectedScenario).name}
-            partnerName={getScenarioDetails(selectedScenario).partner}
+            scenario={selectedScenario.name}
+            partnerName={selectedScenario.partner}
             partnerAvatar={getScenarioDetails(selectedScenario).avatar}
             onEndSession={handleEndSession}
           />
