@@ -18,11 +18,24 @@ export default function MainDashboard() {
   const [activeView, setActiveView] = useState<
     "dashboard" | "scenarios" | "performance" | "chat"
   >("dashboard");
+  const [activeTab, setActiveTab] = useState<"practice" | "performance">("practice");
   const [selectedScenario, setSelectedScenario] = useState<{
     id: string;
     name: string;
     partner: string;
   } | null>(null);
+
+  const userName = "User";
+  const lastSessionDate = "Today";
+
+  const getScenarioDetails = (scenario: { id: string; name: string; partner: string }) => {
+    const details = {
+      "coffee-shop": { avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" },
+      "gym": { avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" },
+      "bar": { avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan" },
+    };
+    return details[scenario.id as keyof typeof details] || { avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Default" };
+  };
 
   const handleScenarioSelect = (scenarioId: string) => {
     const scenarios = {
@@ -39,12 +52,18 @@ export default function MainDashboard() {
     setSelectedScenario(null);
   };
 
+  const handleEndSession = () => {
+    setSelectedScenario(null);
+    setActiveView("dashboard");
+  };
+
   if (activeView === "chat" && selectedScenario) {
     return (
       <VoiceChatInterface
         scenario={selectedScenario.name}
         partnerName={selectedScenario.partner}
-        onBack={handleBackToDashboard}
+        partnerAvatar={getScenarioDetails(selectedScenario).avatar}
+        onEndSession={handleEndSession}
       />
     );
   }
@@ -94,95 +113,81 @@ export default function MainDashboard() {
         </View>
       </View>
 
-      {/* Show Voice Chat if scenario selected */}
-      {selectedScenario ? (
-        <ScrollView className="flex-1 p-4">
-          <VoiceChatInterface
-            scenario={selectedScenario.name}
-            partnerName={selectedScenario.partner}
-            partnerAvatar={getScenarioDetails(selectedScenario).avatar}
-            onEndSession={handleEndSession}
-          />
-        </ScrollView>
-      ) : (
-        <>
-          {/* Tab Navigation */}
-          <View className="flex-row bg-white border-b border-gray-200">
-            <TouchableOpacity
-              className={`flex-1 py-3 ${activeTab === "practice" ? "border-b-2 border-indigo-600" : ""}`}
-              onPress={() => setActiveTab("practice")}
-            >
-              <Text
-                className={`text-center font-medium ${activeTab === "practice" ? "text-indigo-600" : "text-gray-600"}`}
-              >
-                Practice
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 py-3 ${activeTab === "performance" ? "border-b-2 border-indigo-600" : ""}`}
-              onPress={() => setActiveTab("performance")}
-            >
-              <Text
-                className={`text-center font-medium ${activeTab === "performance" ? "text-indigo-600" : "text-gray-600"}`}
-              >
-                Performance
-              </Text>
-            </TouchableOpacity>
-          </View>
+      {/* Tab Navigation */}
+      <View className="flex-row bg-white border-b border-gray-200">
+        <TouchableOpacity
+          className={`flex-1 py-3 ${activeTab === "practice" ? "border-b-2 border-indigo-600" : ""}`}
+          onPress={() => setActiveTab("practice")}
+        >
+          <Text
+            className={`text-center font-medium ${activeTab === "practice" ? "text-indigo-600" : "text-gray-600"}`}
+          >
+            Practice
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className={`flex-1 py-3 ${activeTab === "performance" ? "border-b-2 border-indigo-600" : ""}`}
+          onPress={() => setActiveTab("performance")}
+        >
+          <Text
+            className={`text-center font-medium ${activeTab === "performance" ? "text-indigo-600" : "text-gray-600"}`}
+          >
+            Performance
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-          <ScrollView className="flex-1">
-            {activeTab === "practice" ? (
-              <View className="p-4">
-                {/* Last Session Summary */}
-                <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-                  <Text className="text-lg font-semibold text-gray-800">
-                    Last Session
-                  </Text>
-                  <Text className="text-gray-600 mb-2">
-                    {lastSessionDate} · Coffee Shop Scenario
-                  </Text>
-                  <View className="flex-row justify-between items-center">
-                    <View className="flex-row items-center">
-                      <View className="w-10 h-10 rounded-full bg-indigo-100 mr-3 overflow-hidden">
-                        <Image
-                          source="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma"
-                          style={{ width: 40, height: 40 }}
-                        />
-                      </View>
-                      <View>
-                        <Text className="font-medium">Emma</Text>
-                        <Text className="text-xs text-gray-500">
-                          Friendly & Outgoing
-                        </Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity 
-                      className="flex-row items-center"
-                      onPress={() => handleScenarioSelect("coffee-shop")}
-                    >
-                      <Text className="text-indigo-600 mr-1">Continue</Text>
-                      <ChevronRight size={16} color="#4f46e5" />
-                    </TouchableOpacity>
+      <ScrollView className="flex-1">
+        {activeTab === "practice" ? (
+          <View className="p-4">
+            {/* Last Session Summary */}
+            <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
+              <Text className="text-lg font-semibold text-gray-800">
+                Last Session
+              </Text>
+              <Text className="text-gray-600 mb-2">
+                {lastSessionDate} · Coffee Shop Scenario
+              </Text>
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center">
+                  <View className="w-10 h-10 rounded-full bg-indigo-100 mr-3 overflow-hidden">
+                    <Image
+                      source="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma"
+                      style={{ width: 40, height: 40 }}
+                    />
+                  </View>
+                  <View>
+                    <Text className="font-medium">Emma</Text>
+                    <Text className="text-xs text-gray-500">
+                      Friendly & Outgoing
+                    </Text>
                   </View>
                 </View>
+                <TouchableOpacity 
+                  className="flex-row items-center"
+                  onPress={() => handleScenarioSelect("coffee-shop")}
+                >
+                  <Text className="text-indigo-600 mr-1">Continue</Text>
+                  <ChevronRight size={16} color="#4f46e5" />
+                </TouchableOpacity>
+              </View>
+            </View>
 
-                {/* Practice Scenarios */}
-                <Text className="text-xl font-bold text-gray-800 mb-4">
-                  Choose a Scenario
-                </Text>
-                <PracticeScenarioSelector onScenarioSelect={handleScenarioSelect} />
-              </View>
-            ) : (
-              <View className="p-4">
-                <Text className="text-xl font-bold text-gray-800 mb-4">
-                  Your Progress
-                </Text>
-                <PerformanceDashboard />
-              </View>
-            )}
-          </ScrollView>
-        </>
-      )}
+            {/* Practice Scenarios */}
+            <Text className="text-xl font-bold text-gray-800 mb-4">
+              Choose a Scenario
+            </Text>
+            <PracticeScenarioSelector onScenarioSelect={handleScenarioSelect} />
+          </View>
+        ) : (
+          <View className="p-4">
+            <Text className="text-xl font-bold text-gray-800 mb-4">
+              Your Progress
+            </Text>
+            <PerformanceDashboard />
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
