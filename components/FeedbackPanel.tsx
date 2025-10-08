@@ -1,49 +1,26 @@
 import React from "react";
 import { View, Text, ScrollView } from "react-native";
-import {
-  BarChart2,
-  MessageCircle,
-  Mic,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react-native";
+import { Feather } from "@expo/vector-icons";
 
 interface FeedbackMetric {
   category: string;
   score: number;
   feedback: string;
-  icon: React.ReactNode;
 }
 
 interface FeedbackPanelProps {
-  metrics?: FeedbackMetric[];
+  toneScore?: number;
+  contentScore?: number;
+  flowScore?: number;
   overallScore?: number;
   suggestions?: string[];
   isVisible?: boolean;
 }
 
-const FeedbackPanel = ({
-  metrics = [
-    {
-      category: "Tone",
-      score: 75,
-      feedback:
-        "Your tone is friendly and engaging. Try adding more enthusiasm.",
-      icon: <MessageCircle size={20} color="#6366f1" />,
-    },
-    {
-      category: "Content",
-      score: 60,
-      feedback: "Good topics, but try asking more open-ended questions.",
-      icon: <BarChart2 size={20} color="#8b5cf6" />,
-    },
-    {
-      category: "Listening",
-      score: 85,
-      feedback: "Great job responding to previous points in the conversation.",
-      icon: <Mic size={20} color="#10b981" />,
-    },
-  ],
+const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
+  toneScore = 75,
+  contentScore = 60,
+  flowScore = 85,
   overallScore = 73,
   suggestions = [
     "Try asking about their interests more directly",
@@ -51,8 +28,39 @@ const FeedbackPanel = ({
     "Use more varied conversation starters",
   ],
   isVisible = true,
-}: FeedbackPanelProps) => {
+}) => {
   if (!isVisible) return null;
+
+  const metrics: FeedbackMetric[] = [
+    {
+      category: "Tone",
+      score: toneScore,
+      feedback: "Your tone is friendly and engaging. Try adding more enthusiasm.",
+    },
+    {
+      category: "Content",
+      score: contentScore,
+      feedback: "Good topics, but try asking more open-ended questions.",
+    },
+    {
+      category: "Flow",
+      score: flowScore,
+      feedback: "Great job responding to previous points in the conversation.",
+    },
+  ];
+
+  const getIcon = (category: string) => {
+    switch (category) {
+      case "Tone":
+        return <Feather name="message-circle" size={20} color="#6366f1" />;
+      case "Content":
+        return <Feather name="bar-chart-2" size={20} color="#8b5cf6" />;
+      case "Flow":
+        return <Feather name="mic" size={20} color="#10b981" />;
+      default:
+        return <Feather name="message-circle" size={20} color="#6366f1" />;
+    }
+  };
 
   return (
     <View className="bg-white p-4 rounded-lg shadow-md w-full">
@@ -70,19 +78,19 @@ const FeedbackPanel = ({
           <View key={index} className="mb-3">
             <View className="flex-row justify-between items-center mb-1">
               <View className="flex-row items-center">
-                {metric.icon}
+                {getIcon(metric.category)}
                 <Text className="ml-2 font-medium text-gray-700">
                   {metric.category}
                 </Text>
               </View>
-              <Text className="text-sm font-medium">
+              <View className="flex-row items-center">
                 {metric.score < 60 ? (
-                  <ThumbsDown size={16} color="#ef4444" />
+                  <Feather name="thumbs-down" size={16} color="#ef4444" />
                 ) : (
-                  <ThumbsUp size={16} color="#10b981" />
+                  <Feather name="thumbs-up" size={16} color="#10b981" />
                 )}
-                <Text className="ml-1">{metric.score}%</Text>
-              </Text>
+                <Text className="ml-1 text-sm font-medium">{metric.score}%</Text>
+              </View>
             </View>
             <View className="bg-gray-200 h-2 rounded-full w-full overflow-hidden">
               <View
@@ -111,5 +119,7 @@ const FeedbackPanel = ({
     </View>
   );
 };
+
+FeedbackPanel.displayName = 'FeedbackPanel';
 
 export default FeedbackPanel;

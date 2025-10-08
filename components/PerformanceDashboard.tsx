@@ -1,13 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, Pressable, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import {
-  ArrowUpRight,
-  TrendingUp,
-  MessageCircle,
-  ThumbsUp,
-  Clock,
-} from "lucide-react-native";
+import { Feather } from "@expo/vector-icons";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -44,25 +38,25 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
       label: "Conversation Score",
       value: 78,
       change: 5,
-      icon: <MessageCircle size={20} color="#6366f1" />,
+      icon: <Feather name="message-circle" size={20} color="#6366f1" />,
     },
     {
       label: "Engagement Rate",
       value: 82,
       change: 3,
-      icon: <ThumbsUp size={20} color="#8b5cf6" />,
+      icon: <Feather name="thumbs-up" size={20} color="#8b5cf6" />,
     },
     {
       label: "Avg. Response Time",
       value: 3.2,
       change: -0.5,
-      icon: <Clock size={20} color="#ec4899" />,
+      icon: <Feather name="clock" size={20} color="#ec4899" />,
     },
     {
       label: "Confidence Level",
       value: 65,
       change: 8,
-      icon: <TrendingUp size={20} color="#10b981" />,
+      icon: <Feather name="trending-up" size={20} color="#10b981" />,
     },
   ],
   progressData = {
@@ -195,7 +189,7 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
         <Text className="text-white font-semibold mr-2">
           View Detailed Statistics
         </Text>
-        <ArrowUpRight size={18} color="#ffffff" />
+        <Feather name="arrow-up-right" size={18} color="#ffffff" />
       </Pressable>
     </ScrollView>
   );

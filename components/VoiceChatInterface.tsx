@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from "react-native";
 import { Image } from "expo-image";
-import { Mic, MicOff, SkipForward, Pause, Play } from "lucide-react-native";
+import { Feather } from "@expo/vector-icons";
 import FeedbackPanel from "./FeedbackPanel";
 
 interface VoiceChatInterfaceProps {
@@ -13,14 +13,14 @@ interface VoiceChatInterfaceProps {
   onEndSession?: () => void;
 }
 
-const VoiceChatInterface = ({
+const VoiceChatInterface: React.FC<VoiceChatInterfaceProps> = ({
   partnerName = "Alex",
   partnerAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
   scenario = "Coffee Shop",
   difficulty = "medium",
   agentId = "agent_9901k6v8b4j3e4qtqgxj0ea5psg6",
   onEndSession = () => {},
-}: VoiceChatInterfaceProps) => {
+}) => {
   const [transcript, setTranscript] = useState<
     Array<{ speaker: string; text: string }>
   >([
@@ -31,6 +31,46 @@ const VoiceChatInterface = ({
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("disconnected");
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // ElevenLabs (mobile only) - safely access the module
+  let conversation = null;
+  if (Platform.OS !== 'web') {
+    try {
+      // Safe dynamic import
+      const ElevenLabsModule = require("@elevenlabs/react-native");
+      if (ElevenLabsModule && ElevenLabsModule.useConversation) {
+        const useConversation = ElevenLabsModule.useConversation;
+        conversation = useConversation({
+          onConnect: () => {
+            setIsConnected(true);
+            setStatus("connected");
+            setTranscript((prev) => [
+              ...prev,
+              { speaker: partnerName, text: "Great! Let's start our conversation. How are you doing today?" },
+            ]);
+          },
+          onDisconnect: () => {
+            setIsConnected(false);
+            setStatus("disconnected");
+          },
+          onMessage: (message: any) => {
+            if (message?.type === "agent_response") {
+              setTranscript((prev) => [...prev, { speaker: partnerName, text: message.text || "" }]);
+            } else if (message?.type === "user_transcript") {
+              setTranscript((prev) => [...prev, { speaker: "You", text: message.text || "" }]);
+            }
+          },
+          onSpeaking: (speaking: boolean) => setIsSpeaking(speaking),
+          onError: (error: any) => {
+            console.error("ElevenLabs error:", error);
+            Alert.alert("Error", "Failed to connect to voice agent. Please try again.");
+          },
+        });
+      }
+    } catch (error) {
+      console.warn("Failed to initialize ElevenLabs:", error);
+    }
+  }
 
   // Simulate audio visualization
   useEffect(() => {
@@ -50,32 +90,18 @@ const VoiceChatInterface = ({
   }, [isConnected, isMuted]);
 
   const startConversation = async () => {
-    if (Platform.OS === 'web') {
-      Alert.alert('Not Available', 'Voice chat is only available on mobile devices. Please use the mobile app.');
-      return;
-    }
-    
-    try {
-      setIsConnected(true);
-      setStatus("connected");
-      setTranscript(prev => [...prev, {
-        speaker: partnerName,
-        text: "Great! Let's start our conversation. How are you doing today?"
-      }]);
-    } catch (error) {
-      console.error('Failed to start conversation:', error);
-      Alert.alert('Error', 'Failed to start conversation. Please try again.');
-    }
+    setIsConnected(true);
+    setStatus("connected");
+    setTranscript((prev) => [
+      ...prev,
+      { speaker: partnerName, text: "Great! Let's start our conversation. How are you doing today?" },
+    ]);
   };
 
   const endConversation = async () => {
-    try {
-      setIsConnected(false);
-      setStatus("disconnected");
-      onEndSession();
-    } catch (error) {
-      console.error('Failed to end conversation:', error);
-    }
+    setIsConnected(false);
+    setStatus("disconnected");
+    onEndSession();
   };
 
   const toggleMute = () => {
@@ -163,9 +189,9 @@ const VoiceChatInterface = ({
           disabled={!isConnected}
         >
           {isMuted ? (
-            <MicOff size={24} color={isConnected ? "#ef4444" : "#9ca3af"} />
+            <Feather name="mic-off" size={24} color={isConnected ? "#ef4444" : "#9ca3af"} />
           ) : (
-            <Mic size={24} color={isConnected ? "#3b82f6" : "#9ca3af"} />
+            <Feather name="mic" size={24} color={isConnected ? "#3b82f6" : "#9ca3af"} />
           )}
         </TouchableOpacity>
 
@@ -174,9 +200,9 @@ const VoiceChatInterface = ({
           onPress={isConnected ? endConversation : startConversation}
         >
           {isConnected ? (
-            <Pause size={32} color="white" />
+            <Feather name="pause" size={32} color="white" />
           ) : (
-            <Play size={32} color="white" />
+            <Feather name="play" size={32} color="white" />
           )}
         </TouchableOpacity>
 
@@ -184,7 +210,7 @@ const VoiceChatInterface = ({
           className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center"
           disabled={!isConnected}
         >
-          <SkipForward size={24} color={isConnected ? "#4b5563" : "#9ca3af"} />
+          <Feather name="skip-forward" size={24} color={isConnected ? "#4b5563" : "#9ca3af"} />
         </TouchableOpacity>
       </View>
 
@@ -200,5 +226,7 @@ const VoiceChatInterface = ({
     </View>
   );
 };
+
+VoiceChatInterface.displayName = 'VoiceChatInterface';
 
 export default VoiceChatInterface;

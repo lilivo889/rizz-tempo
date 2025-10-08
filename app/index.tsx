@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Image } from "expo-image";
-import { Bell, Settings, ChevronRight, ArrowLeft } from "lucide-react-native";
+import { Feather } from "@expo/vector-icons";
 
 import PracticeScenarioSelector from "../components/PracticeScenarioSelector";
 import PerformanceDashboard from "../components/PerformanceDashboard";
@@ -93,7 +93,7 @@ export default function MainDashboard() {
               className="mr-3 p-2"
               onPress={handleBackToDashboard}
             >
-              <ArrowLeft size={24} color="#4338ca" />
+              <Feather name="arrow-left" size={24} color="#4338ca" />
             </TouchableOpacity>
           )}
           <View>
@@ -105,10 +105,10 @@ export default function MainDashboard() {
         </View>
         <View className="flex-row">
           <TouchableOpacity className="p-2 mr-2">
-            <Bell size={24} color="#4338ca" />
+            <Feather name="bell" size={24} color="#4338ca" />
           </TouchableOpacity>
           <TouchableOpacity className="p-2">
-            <Settings size={24} color="#4338ca" />
+            <Feather name="settings" size={24} color="#4338ca" />
           </TouchableOpacity>
         </View>
       </View>
@@ -152,7 +152,7 @@ export default function MainDashboard() {
                 <View className="flex-row items-center">
                   <View className="w-10 h-10 rounded-full bg-indigo-100 mr-3 overflow-hidden">
                     <Image
-                      source="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma"
+                      source={{ uri: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" }}
                       style={{ width: 40, height: 40 }}
                     />
                   </View>
@@ -168,7 +168,7 @@ export default function MainDashboard() {
                   onPress={() => handleScenarioSelect("coffee-shop")}
                 >
                   <Text className="text-indigo-600 mr-1">Continue</Text>
-                  <ChevronRight size={16} color="#4f46e5" />
+                  <Feather name="chevron-right" size={16} color="#4f46e5" />
                 </TouchableOpacity>
               </View>
             </View>

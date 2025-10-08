@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { Coffee, Utensils, Users } from "lucide-react-native";
+import { Feather } from "@expo/vector-icons";
 
 interface ScenarioProps {
   id: string;
@@ -23,7 +23,7 @@ const defaultScenarios: ScenarioProps[] = [
     title: "Coffee Shop",
     description:
       "Practice casual conversation in a relaxed coffee shop setting",
-    icon: <Coffee size={24} color="#8B5CF6" />,
+    icon: <Feather name="coffee" size={24} color="#8B5CF6" />,
     image:
       "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=80",
   },
@@ -32,7 +32,7 @@ const defaultScenarios: ScenarioProps[] = [
     title: "Dinner Date",
     description:
       "Master the art of dinner conversation in a restaurant setting",
-    icon: <Utensils size={24} color="#EC4899" />,
+    icon: <Feather name="heart" size={24} color="#EC4899" />,
     image:
       "https://images.unsplash.com/photo-1529417305485-480f579e7578?w=400&q=80",
   },
@@ -41,7 +41,7 @@ const defaultScenarios: ScenarioProps[] = [
     title: "Casual Meetup",
     description:
       "Practice conversation for a casual hangout with potential partners",
-    icon: <Users size={24} color="#3B82F6" />,
+    icon: <Feather name="users" size={24} color="#3B82F6" />,
     image:
       "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80",
   },
